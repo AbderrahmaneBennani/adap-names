@@ -44,11 +44,19 @@ export class Name {
   }
 
   public getComponent(i: number): string {
+    //Check if i is not out of bounds
+    if (i >= this.getNoComponents() || i < 0)
+      throw new Error("Index Out Of Bounds");
+
     return this.components[i];
   }
 
   /** Expects that new Name component c is properly masked */
   public setComponent(i: number, c: string): void {
+    //Check if i is not out of bounds
+    if (i >= this.getNoComponents() || i < 0)
+      throw new Error("Index Out Of Bounds");
+
     this.components[i] = c;
   }
 
@@ -59,6 +67,10 @@ export class Name {
 
   /** Expects that new Name component c is properly masked */
   public insert(i: number, c: string): void {
+    //Check if i is not out of bounds
+    if (i >= this.getNoComponents() || i < 0)
+      throw new Error("Index Out Of Bounds");
+
     this.components.splice(i, 0, c);
   }
 
@@ -68,6 +80,10 @@ export class Name {
   }
 
   public remove(i: number): void {
+    //Check if i is not out of bounds
+    if (i >= this.getNoComponents() || i < 0)
+      throw new Error("Index Out Of Bounds");
+
     this.components.splice(i, 1);
   }
 }
