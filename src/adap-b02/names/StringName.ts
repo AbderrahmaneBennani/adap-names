@@ -7,12 +7,12 @@ export class StringName implements Name {
   protected noComponents: number = 0;
 
   constructor(source: string, delimiter?: string) {
-    this.delimiter = delimiter ? delimiter : DEFAULT_DELIMITER;
+    this.delimiter = delimiter ?? DEFAULT_DELIMITER;
     this.name = source;
-    const components = this.name.split(this.delimiter);
-    this.noComponents = components.length;
+    this.noComponents = this.name.split(this.delimiter).length;
   }
 
+  /** Human-readable string (unescaped) */
   public asString(delimiter: string = this.delimiter): string {
     if (delimiter !== this.delimiter) {
       const components = this.name.split(this.delimiter);
@@ -21,25 +21,28 @@ export class StringName implements Name {
     return this.name;
   }
 
+  /** Machine-readable string with escaping */
   public asDataString(): string {
-    const escape = (value: string): string => {
-      // Escape the Escape Character
-      let result = value.replace(
-        new RegExp(`\\${ESCAPE_CHARACTER}`, "g"),
-        ESCAPE_CHARACTER + ESCAPE_CHARACTER
-      );
-
-      // Escape the Delimiter Character
-      result = result.replace(
-        new RegExp(`\\${DEFAULT_DELIMITER}`, "g"),
-        ESCAPE_CHARACTER + DEFAULT_DELIMITER
-      );
-
-      return result;
-    };
-
     const components = this.name.split(this.delimiter);
-    return components.map(escape).join(DEFAULT_DELIMITER);
+    return components
+      .map((c) => this.escapeComponent(c))
+      .join(DEFAULT_DELIMITER);
+  }
+
+  /** Escape helper: escape ESCAPE_CHARACTER and DEFAULT_DELIMITER */
+  private escapeComponent(component: string): string {
+    const escapeRegex = new RegExp(
+      ESCAPE_CHARACTER.replace(/\\/g, "\\\\"),
+      "g"
+    );
+    const delimiterRegex = new RegExp(
+      DEFAULT_DELIMITER.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"),
+      "g"
+    );
+
+    return component
+      .replace(escapeRegex, ESCAPE_CHARACTER + ESCAPE_CHARACTER)
+      .replace(delimiterRegex, ESCAPE_CHARACTER + DEFAULT_DELIMITER);
   }
 
   public getDelimiterCharacter(): string {
@@ -54,20 +57,29 @@ export class StringName implements Name {
     return this.noComponents;
   }
 
-  public getComponent(x: number): string {
+  public getComponent(i: number): string {
     const components = this.name.split(this.delimiter);
-    return components[x];
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
+    return components[i];
   }
 
-  public setComponent(n: number, c: string): void {
+  public setComponent(i: number, c: string): void {
     const components = this.name.split(this.delimiter);
-    components[n] = c;
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
+    components[i] = c;
     this.name = components.join(this.delimiter);
   }
 
-  public insert(n: number, c: string): void {
+  public insert(i: number, c: string): void {
     const components = this.name.split(this.delimiter);
-    components.splice(n, 0, c);
+    if (i < 0 || i > this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
+    components.splice(i, 0, c);
     this.name = components.join(this.delimiter);
     this.noComponents++;
   }
@@ -79,9 +91,12 @@ export class StringName implements Name {
     this.noComponents++;
   }
 
-  public remove(n: number): void {
+  public remove(i: number): void {
     const components = this.name.split(this.delimiter);
-    components.splice(n, 1);
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
+    components.splice(i, 1);
     this.name = components.join(this.delimiter);
     this.noComponents--;
   }

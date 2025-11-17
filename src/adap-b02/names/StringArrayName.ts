@@ -6,32 +6,38 @@ export class StringArrayName implements Name {
   protected components: string[] = [];
 
   constructor(source: string[], delimiter?: string) {
-    this.delimiter = delimiter ? delimiter : DEFAULT_DELIMITER;
+    this.delimiter = delimiter ?? DEFAULT_DELIMITER;
     this.components = [...source];
   }
 
+  /** Human-readable string, no escaping */
   public asString(delimiter: string = this.delimiter): string {
     return this.components.join(delimiter);
   }
 
+  /** Machine-readable string with escaping */
   public asDataString(): string {
-    const escape = (value: string): string => {
-      // Escape the Escape Character
-      let result = value.replace(
-        new RegExp(`\\${ESCAPE_CHARACTER}`, "g"),
-        ESCAPE_CHARACTER + ESCAPE_CHARACTER
-      );
+    return this.components
+      .map((c) => this.escapeComponent(c))
+      .join(DEFAULT_DELIMITER);
+  }
 
-      // Escape the Delimiter Character
-      result = result.replace(
-        new RegExp(`\\${DEFAULT_DELIMITER}`, "g"),
-        ESCAPE_CHARACTER + DEFAULT_DELIMITER
-      );
+  /** Escape helper: escape ESCAPE_CHARACTER and DEFAULT_DELIMITER */
+  private escapeComponent(component: string): string {
+    // Escape ESCAPE_CHARACTER
+    const EscapeCharacterPattern = new RegExp(
+      ESCAPE_CHARACTER.replace(/\\/g, "\\\\"),
+      "g"
+    );
+    // Escape DEFAULT_DELIMITER
+    const DelimiterCharacterPattern = new RegExp(
+      DEFAULT_DELIMITER.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"),
+      "g"
+    );
 
-      return result;
-    };
-
-    return this.components.map(escape).join(DEFAULT_DELIMITER);
+    return component
+      .replace(EscapeCharacterPattern, ESCAPE_CHARACTER + ESCAPE_CHARACTER)
+      .replace(DelimiterCharacterPattern, ESCAPE_CHARACTER + DEFAULT_DELIMITER);
   }
 
   public getDelimiterCharacter(): string {
@@ -47,14 +53,23 @@ export class StringArrayName implements Name {
   }
 
   public getComponent(i: number): string {
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
     return this.components[i];
   }
 
   public setComponent(i: number, c: string): void {
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
     this.components[i] = c;
   }
 
   public insert(i: number, c: string): void {
+    if (i < 0 || i > this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
     this.components.splice(i, 0, c);
   }
 
@@ -63,6 +78,9 @@ export class StringArrayName implements Name {
   }
 
   public remove(i: number): void {
+    if (i < 0 || i >= this.getNoComponents()) {
+      throw new Error(`Index out of bounds`);
+    }
     this.components.splice(i, 1);
   }
 
