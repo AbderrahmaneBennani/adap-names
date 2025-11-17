@@ -2,57 +2,94 @@ import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 
 export class StringName implements Name {
+  protected delimiter: string = DEFAULT_DELIMITER;
+  protected name: string = "";
+  protected noComponents: number = 0;
 
-    protected delimiter: string = DEFAULT_DELIMITER;
-    protected name: string = "";
-    protected noComponents: number = 0;
+  constructor(source: string, delimiter?: string) {
+    this.delimiter = delimiter ? delimiter : DEFAULT_DELIMITER;
+    this.name = source;
+    const components = this.name.split(this.delimiter);
+    this.noComponents = components.length;
+  }
 
-    constructor(source: string, delimiter?: string) {
-        throw new Error("needs implementation or deletion");
+  public asString(delimiter: string = this.delimiter): string {
+    if (delimiter !== this.delimiter) {
+      const components = this.name.split(this.delimiter);
+      return components.join(delimiter);
     }
+    return this.name;
+  }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
+  public asDataString(): string {
+    const escape = (value: string): string => {
+      // Escape the Escape Character
+      let result = value.replace(
+        new RegExp(`\\${ESCAPE_CHARACTER}`, "g"),
+        ESCAPE_CHARACTER + ESCAPE_CHARACTER
+      );
+
+      // Escape the Delimiter Character
+      result = result.replace(
+        new RegExp(`\\${DEFAULT_DELIMITER}`, "g"),
+        ESCAPE_CHARACTER + DEFAULT_DELIMITER
+      );
+
+      return result;
+    };
+
+    const components = this.name.split(this.delimiter);
+    return components.map(escape).join(DEFAULT_DELIMITER);
+  }
+
+  public getDelimiterCharacter(): string {
+    return this.delimiter;
+  }
+
+  public isEmpty(): boolean {
+    return this.noComponents === 0;
+  }
+
+  public getNoComponents(): number {
+    return this.noComponents;
+  }
+
+  public getComponent(x: number): string {
+    const components = this.name.split(this.delimiter);
+    return components[x];
+  }
+
+  public setComponent(n: number, c: string): void {
+    const components = this.name.split(this.delimiter);
+    components[n] = c;
+    this.name = components.join(this.delimiter);
+  }
+
+  public insert(n: number, c: string): void {
+    const components = this.name.split(this.delimiter);
+    components.splice(n, 0, c);
+    this.name = components.join(this.delimiter);
+    this.noComponents++;
+  }
+
+  public append(c: string): void {
+    const components = this.name.split(this.delimiter);
+    components.push(c);
+    this.name = components.join(this.delimiter);
+    this.noComponents++;
+  }
+
+  public remove(n: number): void {
+    const components = this.name.split(this.delimiter);
+    components.splice(n, 1);
+    this.name = components.join(this.delimiter);
+    this.noComponents--;
+  }
+
+  public concat(other: Name): void {
+    for (let i = 0; i < other.getNoComponents(); i++) {
+      this.append(other.getComponent(i));
     }
-
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getComponent(x: number): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public setComponent(n: number, c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public insert(n: number, c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public append(c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public remove(n: number): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
-    }
-
+    this.noComponents += other.getNoComponents();
+  }
 }
