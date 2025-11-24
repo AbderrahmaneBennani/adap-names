@@ -2,56 +2,59 @@ import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 
 export abstract class AbstractName implements Name {
+  protected delimiter: string = DEFAULT_DELIMITER;
 
-    protected delimiter: string = DEFAULT_DELIMITER;
+  constructor(delimiter: string = DEFAULT_DELIMITER) {
+    this.delimiter = delimiter ?? DEFAULT_DELIMITER;
+  }
 
-    constructor(delimiter: string = DEFAULT_DELIMITER) {
-        throw new Error("needs implementation or deletion");
+  public toString(): string {
+    return this.asDataString();
+  }
+
+  abstract asDataString(): string;
+
+  public isEqual(other: Name): boolean {
+    return this.asDataString() === other.asDataString();
+  }
+
+  public getHashCode(): number {
+    const s = this.asDataString();
+    let hash = 0;
+
+    if (s.length === 0) {
+      return hash;
     }
 
-    public clone(): Name {
-        throw new Error("needs implementation or deletion");
+    for (let i = 0; i < s.length; i++) {
+      const char = s.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0;
     }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
+    return hash;
+  }
 
-    public toString(): string {
-        return this.asDataString();
-    }
+  public isEmpty(): boolean {
+    return this.getNoComponents() === 0;
+  }
 
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
+  public getDelimiterCharacter(): string {
+    return this.delimiter;
+  }
 
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
+  abstract clone(): Name;
 
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
+  abstract asString(delimiter: string): string;
 
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
+  abstract getNoComponents(): number;
 
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
-    }
+  abstract getComponent(i: number): string;
+  abstract setComponent(i: number, c: string): void;
 
-    abstract getNoComponents(): number;
+  abstract insert(i: number, c: string): void;
+  abstract append(c: string): void;
+  abstract remove(i: number): void;
 
-    abstract getComponent(i: number): string;
-    abstract setComponent(i: number, c: string): void;
-
-    abstract insert(i: number, c: string): void;
-    abstract append(c: string): void;
-    abstract remove(i: number): void;
-
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
-    }
-
+  abstract concat(other: Name): void;
 }
