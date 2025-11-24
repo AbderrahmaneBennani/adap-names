@@ -1,51 +1,40 @@
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
+import { escapeComp, unescapeComp } from "./EscapeHelper";
 import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
 
 export class StringArrayName extends AbstractName {
-  protected components: string[] = [];
+  protected components: string[] = []; //escaped components
 
   constructor(source: string[], delimiter?: string) {
     super(delimiter);
-    this.components = [...source];
+    this.components = source.map((comp) =>
+      escapeComp(comp, delimiter ? delimiter : this.delimiter)
+    );
   }
 
   public clone(): Name {
     return new StringArrayName(this.components, this.delimiter);
   }
 
+  // returns a human-readable representation of the Name (unescaped)
   public asString(delimiter: string = this.delimiter): string {
-    return this.components.join(delimiter);
+    let unescapedComponents = this.components.map((comp) =>
+      unescapeComp(comp, this.delimiter)
+    );
+    return unescapedComponents.join(delimiter);
   }
 
+  //returns a machine-readable representation of the Name (escaped)
   public asDataString(): string {
-    return this.components
-      .map((c) => this.escapeComponent(c))
-      .join(DEFAULT_DELIMITER);
-  }
-
-  /** Escape helper: escape ESCAPE_CHARACTER and DEFAULT_DELIMITER */
-  private escapeComponent(component: string): string {
-    // Escape ESCAPE_CHARACTER
-    const EscapeCharacterPattern = new RegExp(
-      ESCAPE_CHARACTER.replace(/\\/g, "\\\\"),
-      "g"
-    );
-    // Escape DEFAULT_DELIMITER
-    const DelimiterCharacterPattern = new RegExp(
-      DEFAULT_DELIMITER.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"),
-      "g"
-    );
-
-    return component
-      .replace(EscapeCharacterPattern, ESCAPE_CHARACTER + ESCAPE_CHARACTER)
-      .replace(DelimiterCharacterPattern, ESCAPE_CHARACTER + DEFAULT_DELIMITER);
+    return this.components.join(this.delimiter);
   }
 
   public getNoComponents(): number {
     return this.components.length;
   }
 
+  //gets the escaped component at index i
   public getComponent(i: number): string {
     if (i < 0 || i >= this.getNoComponents()) {
       throw new Error(`Index out of bounds`);
