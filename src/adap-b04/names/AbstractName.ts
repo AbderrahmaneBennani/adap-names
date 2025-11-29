@@ -9,16 +9,25 @@ export abstract class AbstractName implements Name {
   }
 
   public toString(): string {
+    //Assert ClassInvariant
+    //Assert asDataString() is valid here before returning (PostCondition)
     return this.asDataString();
   }
 
   abstract asDataString(): string;
 
   public isEqual(other: Name): boolean {
+    //Assert ClassInvariant
+    //Assert other is valid here before comparing (PreCondition)
+    //Assert asDataString() is valid here before comparing (PreCondition)
+    //Assert boolean result is valid here before returning (PostCondition)
     return this.asDataString() === other.asDataString();
   }
 
   public getHashCode(): number {
+    //Assert ClassInvariant
+    //Assert asDataString() is valid here before computing hash (PreCondition)
+    //Assert number result is valid here before returning (PostCondition)
     const s = this.asDataString();
     let hash = 0;
 
@@ -36,10 +45,14 @@ export abstract class AbstractName implements Name {
   }
 
   public isEmpty(): boolean {
+    //Assert ClassInvariant
+    //Assert boolean result is valid here before returning (PostCondition)
     return this.getNoComponents() === 0;
   }
 
   public getDelimiterCharacter(): string {
+    //Assert ClassInvariant
+    //Assert delimiter is valid here before returning (PostCondition)
     return this.delimiter;
   }
 
@@ -57,4 +70,13 @@ export abstract class AbstractName implements Name {
   abstract remove(i: number): void;
 
   abstract concat(other: Name): void;
+
+  protected assertClassInvariant(): void {
+    if (this.delimiter.length !== 1) {
+      throw new Error(`Delimiter must be a single character`);
+    }
+    if (this.delimiter === ESCAPE_CHARACTER) {
+      throw new Error(`Delimiter cannot be the escape character`);
+    }
+  }
 }
