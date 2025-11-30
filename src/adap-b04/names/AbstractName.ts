@@ -1,3 +1,6 @@
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { InvalidStateException } from "../common/InvalidStateException";
+import { MethodFailedException } from "../common/MethodFailedException";
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 
@@ -5,29 +8,75 @@ export abstract class AbstractName implements Name {
   protected delimiter: string = DEFAULT_DELIMITER;
 
   constructor(delimiter: string = DEFAULT_DELIMITER) {
-    this.delimiter = delimiter ?? DEFAULT_DELIMITER;
+    //Preconditions
+    IllegalArgumentException.assert(
+      delimiter != null && delimiter != undefined,
+      "Delimiter cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      delimiter.length > 0,
+      "Delimiter cannot be an empty string"
+    );
+    this.delimiter = delimiter;
+    this.assertClassInvariant();
   }
 
   public toString(): string {
-    //Assert ClassInvariant
-    //Assert asDataString() is valid here before returning (PostCondition)
-    return this.asDataString();
+    this.assertClassInvariant();
+
+    const s = this.asDataString();
+
+    //PostCondition
+    MethodFailedException.assert(
+      s != null,
+      "toString() returned null or undefined"
+    );
+
+    return s;
   }
 
   abstract asDataString(): string;
 
   public isEqual(other: Name): boolean {
-    //Assert ClassInvariant
-    //Assert other is valid here before comparing (PreCondition)
-    //Assert asDataString() is valid here before comparing (PreCondition)
-    //Assert boolean result is valid here before returning (PostCondition)
-    return this.asDataString() === other.asDataString();
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      other != null,
+      "Other Name cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      this.getDelimiterCharacter() === other.getDelimiterCharacter(),
+      "Delimiter characters do not match"
+    );
+    IllegalArgumentException.assert(
+      other.asDataString() != null,
+      "Other Name cannot be null or undefined"
+    );
+
+    const result = this.asDataString() === other.asDataString();
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null,
+      "isEqual() returned null or undefined"
+    );
+    MethodFailedException.assert(
+      typeof result === "boolean",
+      "isEqual() returned a non-boolean value"
+    );
+    return result;
   }
 
   public getHashCode(): number {
-    //Assert ClassInvariant
-    //Assert asDataString() is valid here before computing hash (PreCondition)
-    //Assert number result is valid here before returning (PostCondition)
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      this.asDataString() != null,
+      "asDataString() returned null or undefined"
+    );
+
     const s = this.asDataString();
     let hash = 0;
 
@@ -41,18 +90,42 @@ export abstract class AbstractName implements Name {
       hash |= 0;
     }
 
+    //PostConditions
+    MethodFailedException.assert(
+      hash != null,
+      "getHashCode() returned null or undefined"
+    );
+
     return hash;
   }
 
   public isEmpty(): boolean {
-    //Assert ClassInvariant
-    //Assert boolean result is valid here before returning (PostCondition)
-    return this.getNoComponents() === 0;
+    this.assertClassInvariant();
+
+    const result = this.getNoComponents() === 0;
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null,
+      "isEmpty() returned null or undefined"
+    );
+    MethodFailedException.assert(
+      typeof result === "boolean",
+      "isEmpty() returned a non-boolean value"
+    );
+
+    return result;
   }
 
   public getDelimiterCharacter(): string {
-    //Assert ClassInvariant
-    //Assert delimiter is valid here before returning (PostCondition)
+    this.assertClassInvariant();
+
+    //PostCondition
+    MethodFailedException.assert(
+      this.delimiter != null,
+      "getDelimiterCharacter() returned null or undefined"
+    );
+
     return this.delimiter;
   }
 
@@ -72,11 +145,17 @@ export abstract class AbstractName implements Name {
   abstract concat(other: Name): void;
 
   protected assertClassInvariant(): void {
-    if (this.delimiter.length !== 1) {
-      throw new Error(`Delimiter must be a single character`);
-    }
-    if (this.delimiter === ESCAPE_CHARACTER) {
-      throw new Error(`Delimiter cannot be the escape character`);
-    }
+    InvalidStateException.assert(
+      this.delimiter.length !== 0,
+      "Delimiter cannot be an empty string"
+    );
+    InvalidStateException.assert(
+      this.delimiter !== ESCAPE_CHARACTER,
+      "Delimiter cannot be the escape character"
+    );
+    InvalidStateException.assert(
+      this.delimiter.length === 1,
+      "Delimiter must be a single character"
+    );
   }
 }

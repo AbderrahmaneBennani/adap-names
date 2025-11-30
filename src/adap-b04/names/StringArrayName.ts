@@ -1,3 +1,6 @@
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { InvalidStateException } from "../common/InvalidStateException";
+import { MethodFailedException } from "../common/MethodFailedException";
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { escapeComp, unescapeComp } from "./EscapeHelper";
 import { Name } from "./Name";
@@ -8,116 +11,320 @@ export class StringArrayName extends AbstractName {
 
   constructor(source: string[], delimiter?: string) {
     super(delimiter);
-    //Assert ClassInvariant
-    //Assert source is valid here before proceeding (PreCondition)
-    //Assert delimiter is valid here before proceeding (PreCondition)
+    //Preconditions
+    IllegalArgumentException.assert(
+      source != null && source != undefined,
+      "Source cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      source.length > 0,
+      "Source cannot be empty"
+    );
+
     this.components = source.map((comp) =>
       escapeComp(comp, delimiter ? delimiter : this.delimiter)
     );
-    //Assert components is valid here after proceeding (PostCondition)
-    //Assert components length matches source length here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.components != null && this.components != undefined,
+      "Components cannot be null or undefined"
+    );
+    MethodFailedException.assert(
+      this.components.length === source.length,
+      "Components length does not match source length"
+    );
+
+    this.assertClassInvariant();
   }
 
   public clone(): Name {
-    //Assert ClassInvariant
-    //Assert new Name is valid here before returning (PostCondition)
-    return new StringArrayName(this.components, this.delimiter);
+    this.assertClassInvariant();
+
+    const result = new StringArrayName(this.components, this.delimiter);
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null && result != undefined,
+      "Cloned Name cannot be null or undefined"
+    );
+    return result;
   }
 
   // returns a human-readable representation of the Name (unescaped)
   public asString(delimiter: string = this.delimiter): string {
-    //Assert ClassInvariant
-    //Assert delimiter is valid here before proceeding (PreCondition)
+    this.assertClassInvariant();
+
+    //Preconditions
+    IllegalArgumentException.assert(
+      delimiter != null && delimiter != undefined,
+      "Delimiter cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      delimiter.length > 0,
+      "Delimiter cannot be an empty string"
+    );
+
     let unescapedComponents = this.components.map((comp) =>
       unescapeComp(comp, this.delimiter)
     );
-    //Assert result is valid here before returning (PostCondition)
-    return unescapedComponents.join(delimiter);
+    const result = unescapedComponents.join(delimiter);
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null && result != undefined,
+      "asString() returned null or undefined"
+    );
+
+    return result;
   }
 
   //returns a machine-readable representation of the Name (escaped)
   public asDataString(): string {
-    //Assert ClassInvariant
-    //Assert result is valid here before returning (PostCondition)
-    return this.components.join(this.delimiter);
+    this.assertClassInvariant();
+
+    const result = this.components.join(this.delimiter);
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null && result != undefined,
+      "asDataString() returned null or undefined"
+    );
+    return result;
   }
 
   public getNoComponents(): number {
-    //Assert ClassInvariant
-    //Assert number result is valid here before returning (PostCondition)
-    return this.components.length;
+    this.assertClassInvariant();
+
+    const result = this.components.length;
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null && result != undefined,
+      "getNoComponents() returned null or undefined"
+    );
+    MethodFailedException.assert(
+      typeof result === "number",
+      "getNoComponents() returned a non-number value"
+    );
+
+    return result;
   }
 
   //gets the escaped component at index i
   public getComponent(i: number): string {
-    //Assert ClassInvariant
-    //Assert i is valid here before proceeding (PreCondition)
-    if (i < 0 || i >= this.getNoComponents()) {
-      throw new Error(`Index out of bounds`);
-    }
-    //Assert result is valid here before returning (PostCondition)
-    return this.components[i];
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      i != null && i != undefined,
+      "Index cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof i === "number",
+      "Index must be a number"
+    );
+    IllegalArgumentException.assert(
+      i >= 0 && i < this.getNoComponents(),
+      "Index out of bounds"
+    );
+
+    const result = this.components[i];
+
+    //PostConditions
+    MethodFailedException.assert(
+      result != null && result != undefined,
+      "getComponent() returned null or undefined"
+    );
+    MethodFailedException.assert(
+      typeof result === "string",
+      "getComponent() returned a non-string value"
+    );
+
+    return result;
   }
 
   public setComponent(i: number, c: string) {
-    //Assert ClassInvariant
-    //Assert i is valid here before proceeding (PreCondition)
-    //Assert c is valid here before proceeding (PreCondition)
-    //Assert c is properly masked here before proceeding (PreCondition)
-    if (i < 0 || i >= this.getNoComponents()) {
-      throw new Error(`Index out of bounds`);
-    }
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      i != null && i != undefined,
+      "Index cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof i === "number",
+      "Index must be a number"
+    );
+    IllegalArgumentException.assert(
+      i >= 0 && i < this.getNoComponents(),
+      "Index out of bounds"
+    );
+    IllegalArgumentException.assert(
+      c != null && c != undefined,
+      "Component cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof c === "string",
+      "Component must be a string"
+    );
+
     this.components[i] = c;
-    //Assert component at index i is properly set here after proceeding (PostCondition)
-    //Assert components length remains unchanged here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.components[i] === c,
+      "Component was not set correctly"
+    );
+
+    this.assertClassInvariant();
   }
 
   public insert(i: number, c: string) {
-    //Assert ClassInvariant
-    //Assert i is valid here before proceeding (PreCondition)
-    //Assert c is valid here before proceeding (PreCondition)
-    //Assert c is properly masked here before proceeding (PreCondition)
-    if (i < 0 || i > this.getNoComponents()) {
-      throw new Error(`Index out of bounds`);
-    }
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      i != null && i != undefined,
+      "Index cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof i === "number",
+      "Index must be a number"
+    );
+    IllegalArgumentException.assert(
+      i >= 0 && i <= this.getNoComponents(),
+      "Index out of bounds"
+    );
+    IllegalArgumentException.assert(
+      c != null && c != undefined,
+      "Component cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof c === "string",
+      "Component must be a string"
+    );
+    IllegalArgumentException.assert(
+      escapeComp(unescapeComp(c, this.delimiter), this.delimiter) === c,
+      "Component is not properly escaped"
+    );
+
+    let oldLength = this.getNoComponents();
     this.components.splice(i, 0, c);
-    //Assert component c is properly inserted at index i here after proceeding (PostCondition)
-    //Assert components length is increased by one here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.components[i] === c,
+      "Component was not inserted correctly"
+    );
+    MethodFailedException.assert(
+      this.getNoComponents() === oldLength + 1,
+      "Components length was not increased correctly"
+    );
+
+    this.assertClassInvariant();
   }
 
   public append(c: string) {
-    //Assert ClassInvariant
-    //Assert c is valid here before proceeding (PreCondition)
-    //Assert c is properly masked here before proceeding (PreCondition)
+    this.assertClassInvariant();
+    //PreConditions
+    IllegalArgumentException.assert(
+      c != null && c != undefined,
+      "Component cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof c === "string",
+      "Component must be a string"
+    );
+    IllegalArgumentException.assert(
+      escapeComp(unescapeComp(c, this.delimiter), this.delimiter) === c,
+      "Component is not properly escaped"
+    );
+
+    let oldLength = this.getNoComponents();
     this.components.push(c);
-    //Assert component c is properly appended here after proceeding (PostCondition)
-    //Assert components length is increased by one here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.components[this.getNoComponents() - 1] === c,
+      "Component was not appended correctly"
+    );
+    MethodFailedException.assert(
+      this.getNoComponents() === oldLength + 1,
+      "Components length was not increased correctly"
+    );
+
+    this.assertClassInvariant();
   }
 
   public remove(i: number) {
-    //Assert ClassInvariant
-    //Assert i is valid here before proceeding (PreCondition)
+    this.assertClassInvariant();
+
+    //PreConditions
+    IllegalArgumentException.assert(
+      i != null && i != undefined,
+      "Index cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      typeof i === "number",
+      "Index must be a number"
+    );
+    IllegalArgumentException.assert(
+      i >= 0 && i < this.getNoComponents(),
+      "Index out of bounds"
+    );
     if (i < 0 || i >= this.getNoComponents()) {
       throw new Error(`Index out of bounds`);
     }
+
+    let oldLength = this.getNoComponents();
     this.components.splice(i, 1);
-    //Assert component at index i is properly removed here after proceeding (PostCondition)
-    //Assert components length is decreased by one here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.getNoComponents() === oldLength - 1,
+      "Components length was not decreased correctly"
+    );
+
+    this.assertClassInvariant();
   }
 
   public concat(other: Name): void {
-    //Assert ClassInvariant
-    //Assert other is valid here before proceeding (PreCondition)
-    //Assert delimiter of other matches this delimiter here before proceeding (PreCondition)
+    this.assertClassInvariant();
+    //PreConditions
+    IllegalArgumentException.assert(
+      other != null && other != undefined,
+      "Other Name cannot be null or undefined"
+    );
+    IllegalArgumentException.assert(
+      other.getDelimiterCharacter() === this.delimiter,
+      "Other Name delimiter does not match"
+    );
+
+    let oldLength = this.getNoComponents();
     for (let i = 0; i < other.getNoComponents(); i++) {
       this.components.push(other.getComponent(i));
     }
-    //Assert components length is increased by other's length here after proceeding (PostCondition)
-    //Assert ClassInvariant
+
+    //PostConditions
+    MethodFailedException.assert(
+      this.getNoComponents() === oldLength + other.getNoComponents(),
+      "Components length was not increased correctly"
+    );
+
+    this.assertClassInvariant();
+  }
+
+  protected assertClassInvariant(): void {
+    super.assertClassInvariant();
+    InvalidStateException.assert(
+      this.components.length === this.getNoComponents(),
+      "Components length does not match number of components"
+    );
+    //Allows empty and null components, but not undefined
+    InvalidStateException.assert(
+      this.components.every((comp) => comp !== undefined),
+      "Components contains undefined values"
+    );
   }
 }
