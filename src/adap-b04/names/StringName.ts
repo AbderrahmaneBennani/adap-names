@@ -47,9 +47,6 @@ export class StringName extends AbstractName {
    * Parses the name string into escaped components.
    */
   private getComponents(): string[] {
-    this.assertClassInvariant();
-    //Components lenght is more than 0 (checked in class invariant)
-
     const esc = ESCAPE_CHARACTER;
     const del = this.delimiter;
 
@@ -65,17 +62,6 @@ export class StringName extends AbstractName {
       restored = restored.split(StringName.TOKEN_DEL).join(esc + del);
       return restored;
     });
-
-    //PostConditions
-    MethodFailedException.assert(
-      restoredComponents != null,
-      "Components cannot be null or undefined"
-    );
-    MethodFailedException.assert(
-      restoredComponents.length === this.getNoComponents(),
-      "Components length does not match number of components"
-    );
-
     return restoredComponents;
   }
 
@@ -366,7 +352,7 @@ export class StringName extends AbstractName {
   protected assertClassInvariant(): void {
     super.assertClassInvariant();
     InvalidStateException.assert(
-      this.getComponents().length === this.getNoComponents(),
+      this.getComponents().length === this.noComponents,
       "Components length does not match number of components"
     );
     //Allows empty and null components, but not undefined
@@ -379,7 +365,7 @@ export class StringName extends AbstractName {
       "Name string cannot be null or undefined"
     );
     InvalidStateException.assert(
-      this.getNoComponents() > 0,
+      this.noComponents > 0,
       "There are no components in the Name"
     );
   }

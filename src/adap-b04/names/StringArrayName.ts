@@ -317,8 +317,8 @@ export class StringArrayName extends AbstractName {
   protected assertClassInvariant(): void {
     super.assertClassInvariant();
     InvalidStateException.assert(
-      this.components.length === this.getNoComponents(),
-      "Components length does not match number of components"
+      this.components.length > 0,
+      "Components length must be greater than 0"
     );
     //Allows empty and null components, but not undefined
     InvalidStateException.assert(

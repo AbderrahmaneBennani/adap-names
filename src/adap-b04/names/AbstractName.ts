@@ -18,7 +18,6 @@ export abstract class AbstractName implements Name {
       "Delimiter cannot be an empty string"
     );
     this.delimiter = delimiter;
-    this.assertClassInvariant();
   }
 
   public toString(): string {
