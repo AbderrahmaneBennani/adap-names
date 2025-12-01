@@ -1,7 +1,7 @@
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { InvalidStateException } from "../common/InvalidStateException";
 import { MethodFailedException } from "../common/MethodFailedException";
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
+import { ESCAPE_CHARACTER } from "../common/Printable";
 import { escapeComp, unescapeComp } from "./EscapeHelper";
 import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
